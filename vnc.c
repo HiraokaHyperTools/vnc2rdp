@@ -150,6 +150,12 @@ v2r_vnc_recv_server_init(v2r_vnc_t *v)
 
 	/* set colour shift to RDP order */
 	switch (v->depth) {
+	case 32:
+		v->red_shift = 16;
+		v->green_shift = 8;
+		v->blue_shift = 0;
+		v->bpp = 32;
+		break;
 	case 24:
 		v->red_shift = 16;
 		v->green_shift = 8;
