@@ -16,11 +16,19 @@
  * limitations under the License.
  */
 
+#ifndef _WIN32
 #include <netinet/tcp.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#pragma comment(lib, "ws2_32")
+#endif
 
 #include "log.h"
 #include "rdp.h"
@@ -338,7 +346,11 @@ v2r_vnc_destory(v2r_vnc_t *v)
 		return;
 	}
 	if (v->fd != 0) {
+#ifndef _WIN32
 		close(v->fd);
+#else
+		closesocket(v->fd);
+#endif
 	}
 	if (v->packet != NULL) {
 		v2r_packet_destory(v->packet);

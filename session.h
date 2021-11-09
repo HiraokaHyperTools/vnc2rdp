@@ -19,7 +19,12 @@
 #ifndef _SESSION_H_
 #define _SESSION_H_
 
+#if _WIN32
+#include <winsock2.h>
+#define INET_ADDRSTRLEN 16
+#else
 #include <netinet/in.h>
+#endif
 
 #define MAX_EVENTS					64
 
@@ -40,7 +45,9 @@ typedef struct _v2r_session_opt_t {
 typedef struct _v2r_session_t {
 	v2r_rdp_t *rdp;
 	v2r_vnc_t *vnc;
+#ifndef _WIN32
 	int epoll_fd;
+#endif
 	const v2r_session_opt_t *opt;
 } v2r_session_t;
 

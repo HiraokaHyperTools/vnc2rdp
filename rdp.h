@@ -107,13 +107,15 @@ typedef struct _v2r_rdp_t {
 	uint8_t altgr;
 } v2r_rdp_t;
 
+#pragma pack(push, 1)
+
 typedef struct _share_ctrl_hdr_t {
 	uint16_t total_length;
 	uint16_t type:4;
 	uint16_t version_low:4;
 	uint16_t version_high:8;
 	uint16_t pdu_source;
-} __attribute__ ((packed)) share_ctrl_hdr_t;
+} share_ctrl_hdr_t;
 
 typedef struct _share_data_hdr_t {
 	share_ctrl_hdr_t share_ctrl_hdr;
@@ -124,7 +126,9 @@ typedef struct _share_data_hdr_t {
 	uint8_t pdu_type2;
 	uint8_t compressed_type;
 	uint16_t compressed_length;
-} __attribute__ ((packed)) share_data_hdr_t;
+} share_data_hdr_t;
+
+#pragma pack(pop)
 
 extern v2r_rdp_t *v2r_rdp_init(v2r_session_t *session);
 extern void v2r_rdp_destory(v2r_rdp_t *r);

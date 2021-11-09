@@ -42,4 +42,9 @@ set(VNC2RDP_SRC
 
 add_executable(vnc2rdp ${VNC2RDP_SRC})
 
+if(WIN32)
+	add_subdirectory(getopt_mb_uni_src)
+	target_link_libraries(vnc2rdp PRIVATE getopt)
+endif(WIN32)
+
 install(TARGETS vnc2rdp DESTINATION bin)

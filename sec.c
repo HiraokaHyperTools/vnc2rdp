@@ -142,6 +142,8 @@ v2r_sec_init_packet(v2r_packet_t *p)
 	V2R_PACKET_SEEK(p, 4);
 }
 
+#ifndef _WIN32
+
 int
 v2r_sec_generate_server_random(v2r_sec_t *s)
 {
@@ -163,6 +165,31 @@ v2r_sec_generate_server_random(v2r_sec_t *s)
 fail:
 	return -1;
 }
+
+#else
+
+int
+v2r_sec_generate_server_random(v2r_sec_t *s)
+{
+	int i;
+	struct timespec tp;
+
+	if (timespec_get(&tp, TIME_UTC) == -1) {
+		v2r_log_error("get current time error: %s", ERRMSG);
+		goto fail;
+	}
+	srand((unsigned int)tp.tv_nsec);
+	for (i = 0; i < SERVER_RANDOM_LEN; i++) {
+		s->server_random[i] = rand();
+	}
+
+	return 0;
+
+fail:
+	return -1;
+}
+
+#endif
 
 int
 v2r_sec_write_server_certificate(v2r_sec_t *s, v2r_packet_t *p)

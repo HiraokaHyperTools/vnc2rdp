@@ -16,12 +16,16 @@
  * limitations under the License.
  */
 
+#ifndef _WIN32
 #include <netinet/tcp.h>
+#endif
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 
 #include "log.h"
 #include "tpkt.h"
@@ -53,7 +57,11 @@ v2r_tpkt_destory(v2r_tpkt_t *t)
 		return;
 	}
 	if (t->fd != 0) {
+#ifndef _WIN32
 		close(t->fd);
+#else
+		closesocket(t->fd);
+#endif
 	}
 	free(t);
 }
@@ -88,7 +96,7 @@ v2r_tpkt_recv(v2r_tpkt_t *t, v2r_packet_t *p)
 
 	n = recv(t->fd, p->current, TPKT_HEADER_LEN, MSG_WAITALL);
 	if (n == -1) {
-		v2r_log_error("recevie data from RDP client error: %s", ERRMSG);
+		v2r_log_error("recevie data from RDP client error: %s", WINSOCK_ERRMSG);
 		goto fail;
 	}
 	if (n == 0) {
@@ -108,7 +116,7 @@ v2r_tpkt_recv(v2r_tpkt_t *t, v2r_packet_t *p)
 	n = recv(t->fd, p->current, tpkt_len - TPKT_HEADER_LEN,
 			 MSG_WAITALL);
 	if (n == -1) {
-		v2r_log_error("recevie data from RDP client error: %s", ERRMSG);
+		v2r_log_error("recevie data from RDP client error: %s", WINSOCK_ERRMSG);
 		goto fail;
 	}
 	if (n == 0) {

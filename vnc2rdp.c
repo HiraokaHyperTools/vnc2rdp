@@ -16,14 +16,21 @@
  * limitations under the License.
  */
 
+#ifndef _WIN32
 #include <arpa/inet.h>
 #include <getopt.h>
+#endif
+#ifdef _WIN32
+#include "getopt_mb_uni_src/getopt.h"
+#endif
 #include <signal.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "log.h"
 #include "rdp.h"
@@ -31,12 +38,21 @@
 #include "session.h"
 #include "vnc.h"
 
+#ifdef _WIN32
+#undef ERROR
+#endif
+
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#endif
+
 #define ERROR(...) \
 	fprintf(stderr, "ERROR: "); \
 	fprintf(stderr, __VA_ARGS__)
 
 int g_process = 1;
 
+#ifndef _WIN32
 void
 signal_handler(int signal)
 {
@@ -44,6 +60,7 @@ signal_handler(int signal)
 		g_process = 0;
 	}
 }
+#endif
 
 static void
 process_connection(int client_fd, const v2r_session_opt_t *opt)
@@ -152,7 +169,9 @@ main(int argc, char *argv[])
 	uint16_t listen_port;
 	int listen_fd, client_fd, ch, optval = 1;
 	struct sockaddr_in listen_addr;
+#ifndef _WIN32
 	struct sigaction act;
+#endif
 	struct option longopts[] = {
 		{"listen", required_argument, NULL, 'l'},
 		{"encryption", required_argument, NULL, 'e'},
@@ -164,6 +183,15 @@ main(int argc, char *argv[])
 		{NULL, 0, NULL, 0}
 	};
 	v2r_session_opt_t opt;
+
+#ifdef _WIN32
+	{
+		WSADATA wsa_data;
+		if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
+			exit(EXIT_FAILURE);
+		}
+	}
+#endif
 
 	/* clear session option */
 	memset(&opt, 0, sizeof(opt));
@@ -236,6 +264,7 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+#ifndef _WIN32
 	/* set signal handler */
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = signal_handler;
@@ -245,6 +274,7 @@ main(int argc, char *argv[])
 		v2r_log_error("register signal handler error: %s", ERRMSG);
 		exit(EXIT_FAILURE);
 	}
+#endif
 
 	if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		v2r_log_error("create listen socket error: %s", ERRMSG);
@@ -286,7 +316,11 @@ main(int argc, char *argv[])
 		}
 		process_connection(client_fd, &opt);
 	}
+#ifndef _WIN32
 	close(listen_fd);
+#else
+	closesocket(listen_fd);
+#endif
 
 	return 0;
 }

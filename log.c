@@ -21,7 +21,14 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
+
+#ifdef _MSC_VER
+#include <process.h>
+#define getpid _getpid
+#endif
 
 #include "log.h"
 
@@ -37,14 +44,18 @@ void v2r_log(uint8_t level, const char *file, int line, const char *fmt, ...)
 	struct tm t;
 	va_list ap;
 
-	/* 获取当前时间 */
+	// Gets the current time
+#ifndef _MSC_VER
 	localtime_r(&current_time, &t);
-	/* 格式化日志头部 */
+#else
+	localtime_s(&t, &current_time);
+#endif
+	// Format the log header
 	ptr += snprintf(log_data, sizeof(log_data),
 		"[%4d/%02d/%02d %02d:%02d:%02d] [%u] [%s] [%s:%d] ",
 		t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min,
 		t.tm_sec, getpid(), v2r_log_level_str[level], file, line);
-	/* 添加日志信息 */
+	// Add log information
 	va_start(ap, fmt);
 	vsnprintf(ptr, sizeof(log_data) - (ptr - log_data), fmt, ap);
 	va_end(ap);

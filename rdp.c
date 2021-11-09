@@ -425,7 +425,7 @@ v2r_rdp_recv(v2r_rdp_t *r, v2r_packet_t *p, share_data_hdr_t *hdr)
 		goto fail;
 	}
 	if (hdr->share_ctrl_hdr.type == PDUTYPE_DATAPDU) {
-		V2R_PACKET_READ_N(p, (void *)hdr + sizeof(share_ctrl_hdr_t),
+		V2R_PACKET_READ_N(p, (uint8_t *)hdr + sizeof(share_ctrl_hdr_t),
 						  sizeof(share_data_hdr_t) - sizeof(share_ctrl_hdr_t));
 	}
 

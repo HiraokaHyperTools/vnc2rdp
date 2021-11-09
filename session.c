@@ -18,8 +18,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/epoll.h>
 #include <unistd.h>
+#endif
 
 #include "log.h"
 #include "rdp.h"
@@ -74,9 +76,11 @@ v2r_session_destory(v2r_session_t *s)
 	if (s->vnc != NULL) {
 		v2r_vnc_destory(s->vnc);
 	}
+#ifndef _WIN32
 	if (s->epoll_fd != 0) {
 		close(s->epoll_fd);
 	}
+#endif
 	free(s);
 }
 
@@ -96,6 +100,7 @@ fail:
 	return -1;
 }
 
+#ifndef _WIN32
 void
 v2r_session_transmit(v2r_session_t *s)
 {
@@ -148,3 +153,41 @@ fail:
 	v2r_log_info("session transmit end");
 	return;
 }
+#else
+void
+v2r_session_transmit(v2r_session_t *s)
+{
+	int nfds, rdp_fd, vnc_fd;
+	fd_set read_set;
+
+	rdp_fd = s->rdp->sec->mcs->x224->tpkt->fd;
+	vnc_fd = s->vnc->fd;
+
+	v2r_log_info("session transmit start");
+
+	while (1) {
+		FD_ZERO(&read_set);
+		FD_SET(rdp_fd, &read_set);
+		FD_SET(vnc_fd, &read_set);
+
+		nfds = select(0, &read_set, NULL, NULL, NULL);
+		if (nfds == SOCKET_ERROR) {
+			goto fail;
+		}
+		if (FD_ISSET(rdp_fd, &read_set)) {
+			if (v2r_rdp_process(s->rdp) == -1) {
+				goto fail;
+			}
+		}
+		if (FD_ISSET(vnc_fd, &read_set)) {
+			if (v2r_vnc_process(s->vnc) == -1) {
+				goto fail;
+			}
+		}
+	}
+
+fail:
+	v2r_log_info("session transmit end");
+	return;
+}
+#endif
