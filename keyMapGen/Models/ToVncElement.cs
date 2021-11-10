@@ -9,8 +9,9 @@ namespace keyMapGen.Models
 {
     public class ToVncElement
     {
+        [XmlAttribute] public string hint;
         [XmlAttribute] public ushort key_code;
         [XmlAttribute] public uint key;
-        [XmlAttribute] public string hint;
+        [XmlAttribute] public uint lshift_key;
     }
 }

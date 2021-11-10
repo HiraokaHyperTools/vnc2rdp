@@ -7,9 +7,9 @@ using System.Xml.Serialization;
 
 namespace keyMapGen.Models
 {
-    [XmlRoot]
-    public class Designation
+    public class KeyboardLayout
     {
-        [XmlElement] public KeyboardLayout[] KeyboardLayout;
+        [XmlAttribute] public string Layout;
+        [XmlElement] public ToVncElement[] ToVnc;
     }
 }
