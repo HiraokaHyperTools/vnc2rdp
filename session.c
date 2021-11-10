@@ -88,13 +88,20 @@ int
 v2r_session_build_conn(v2r_session_t *s, int client_fd, int server_fd)
 {
 	if (v2r_vnc_build_conn(s->vnc, server_fd) == -1) {
-		goto fail;
+		goto server_fail;
 	}
 	if (v2r_rdp_build_conn(s->rdp, client_fd) == -1) {
 		goto fail;
 	}
 
 	return 0;
+
+server_fail:
+#ifndef _WIN32
+	close(client_fd);
+#else
+	closesocket(client_fd);
+#endif
 
 fail:
 	return -1;

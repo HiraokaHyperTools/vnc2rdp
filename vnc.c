@@ -43,7 +43,12 @@ v2r_vnc_recv(v2r_vnc_t *v)
 	v2r_packet_reset(v->packet);
 
 	n = recv(v->fd, v->packet->current, v->packet->max_len, 0);
-	if (n == -1 || n == 0) {
+	if (n == 0) {
+		v2r_log_debug("remote vnc connection ended");
+		goto fail;
+	}
+	if (n == -1) {
+		v2r_log_debug("remote vnc connection ended: %s", WINSOCK_ERRMSG);
 		goto fail;
 	}
 	v->packet->end += n;

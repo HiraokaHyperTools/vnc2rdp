@@ -517,7 +517,6 @@ int
 v2r_rdp_send_palette_update(v2r_rdp_t *r, uint32_t number_colors,
 							uint8_t (*palette_entries)[3])
 {
-	uint32_t i;
 	share_data_hdr_t hdr;
 
 	v2r_rdp_init_packet(r->packet, sizeof(share_data_hdr_t));

@@ -50,7 +50,8 @@
 #define ERRMSG strerror(errno)
 
 #ifdef _WIN32
-#define WINSOCK_ERRMSG strerror(WSAGetLastError())
+extern char *winsock_errmsg();
+#define WINSOCK_ERRMSG winsock_errmsg()
 #endif
 
 void v2r_log(uint8_t level, const char *file, int line, const char *fmt, ...);

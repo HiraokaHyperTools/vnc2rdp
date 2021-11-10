@@ -28,6 +28,7 @@
 #define SCANCODE_NUMLOCK						0x45
 
 #define KEYBOARD_LAYOUT_US						0x00000409
+#define KEYBOARD_LAYOUT_JA						0x00000411
 #define KEYBOARD_LAYOUT_CHINESE_SIMPLIFIED		0x00000804
 
 typedef struct _v2r_keymap_t {

@@ -45,6 +45,9 @@
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #endif
+#ifdef _WIN32
+#include <process.h>
+#endif
 
 #define ERROR(...) \
 	fprintf(stderr, "ERROR: "); \
@@ -105,6 +108,39 @@ process_connection(int client_fd, const v2r_session_opt_t *opt)
 fail:
 	v2r_session_destory(session);
 }
+
+#ifdef _WIN32
+typedef struct {
+	int client_fd;
+	const v2r_session_opt_t *opt;
+} t_process_connection;
+
+static void
+process_connection_stub(t_process_connection *state)
+{
+	v2r_log_debug("starting new session");
+	process_connection(state->client_fd, state->opt);
+	v2r_log_debug("terminating current session");
+	free(state);
+}
+
+static void
+process_connection_with_newthread(int client_fd, const v2r_session_opt_t *opt)
+{
+	t_process_connection *state = malloc(sizeof(t_process_connection));
+	if (state == NULL) {
+		abort();
+	}
+	state->client_fd = client_fd;
+	state->opt = opt;
+
+	_beginthread(
+		process_connection_stub,
+		0,
+		state
+	);
+}
+#endif
 
 static void
 parse_address(const char *address, char *ip, int len, uint16_t *port)
@@ -314,7 +350,11 @@ main(int argc, char *argv[])
 			v2r_log_error("accept new connection error: %s", ERRMSG);
 			continue;
 		}
+#ifdef _WIN32
+		process_connection_with_newthread(client_fd, &opt);
+#else
 		process_connection(client_fd, &opt);
+#endif
 	}
 #ifndef _WIN32
 	close(listen_fd);
