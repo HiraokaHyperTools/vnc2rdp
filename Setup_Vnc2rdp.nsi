@@ -13,7 +13,9 @@
 !define APP "vnc2rdp"
 !define SERVICE "${APP}"
 
-SetCompress off
+!system 'MySign "build-vs\Release\vnc2rdp.exe" "build-vs\getopt_mb_uni_src\Release\getopt.dll"'
+!finalize 'MySign "%1"'
+;SetCompress off
 
 ; The name of the installer
 Name "${APP}"
